@@ -1,0 +1,34 @@
+{
+	"name": "valuemeasure",
+	"version": "0.0.1",
+	"description": "",
+	"author": "Mark M. Young",
+	"dependencies": {},
+	"keywords": [
+		"measure",
+		"unit of measure",
+		"units"
+	],
+	"license": "GPL-3.0",
+	"main": "index.js",
+	"browser": {
+		"timeduration": "./dist/ValueMeasure.js"
+	},
+	"homepage": "https://github.com/MarkMYoung/ValueMeasure",
+	"bugs": {
+		"url": "https://github.com/MarkMYoung/ValueMeasure/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/MarkMYoung/ValueMeasure.git"
+	},
+	"devDependencies": {
+		"jest": "^24.5.0"
+	},
+	"scripts": {
+		"test": "jest"
+	},
+	"jest": {
+		"verbose": true
+	}
+}

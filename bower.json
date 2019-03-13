@@ -1,0 +1,29 @@
+{
+	"name":"valuemeasure",
+	"description":"",
+
+	"authors":["Mark M. Young"],
+	"dependencies":{},
+	"ignore":
+	[
+		"**/.*",
+		"bower_components",
+		"node_modules",
+		"_notes"
+	],
+	"keywords":
+	[
+		"measure",
+		"unit of measure",
+		"units"
+	],
+	"license":"GPL-3.0",
+	"main":
+	[
+		"index.js"
+	],
+	"moduleType":
+	[
+		"globals"
+	]
+}
