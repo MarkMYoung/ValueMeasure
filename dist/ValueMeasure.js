@@ -1,19 +1,19 @@
 'use strict';
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
-class MeasureCollator
+class MeasureUnitCollator
 {
 	/**
-	 * @typedef MeasureCollatorOptions
+	 * @typedef MeasureUnitCollatorOptions
 	 * @param {*} options
 	 * @property {?[string]=[]} operator.locales
 	 *
-	 * @param {MeasureCollatorOptions} this.options
+	 * @param {MeasureUnitCollatorOptions} this.options
 	 */
 	constructor( options )
 	{
 		let derived_locales = (typeof( options ) === 'object' && options !== null)
 			?options.locales
-			:MeasureCollator.defaults.locales;
+			:MeasureUnitCollator.defaults.locales;
 		this.exponentCollator = new Intl.Collator( derived_locales, {'numeric':true});
 		this.nameCollator = new Intl.Collator( derived_locales, {'sensitivity':'base'});
 	}
@@ -111,16 +111,16 @@ class MeasureCollator
 		});
 	}
 }
-MeasureCollator.defaults =
+MeasureUnitCollator.defaults =
 {
 	'locales':[],
 };
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
-// if( typeof( module ) !== 'undefined' ){module.exports = MeasureCollator;}
+// if( typeof( module ) !== 'undefined' ){module.exports = MeasureUnitCollator;}
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
 // 'use strict';
-// const MeasureCollator = require( './MeasureCollator' );
+// const MeasureUnitCollator = require( './MeasureUnitCollator' );
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
 /**
  * @version 1.0.0 (2019-01-07)
@@ -128,8 +128,9 @@ MeasureCollator.defaults =
  * @property {?(string|object|[object]|UnitOfMeasure|[UnitOfMeasure])=''} unit - Unit(s) of the measure.
  * @property {?number=0.0} value - Numeric value of the measure.
  * @example <caption>5 (80,000-kernel) bag</caption>
- *	bagMeasure = new Measure(
+ *	let bagMeasure = new Measure(
  *	{
+ *		'value':5,
  *		'unit':
  *		{
  *			'name':'bag',
@@ -139,18 +140,16 @@ MeasureCollator.defaults =
  *				'value':80000,
  *			},
  *		},
- *		'value':5,
  *	});
- *	measureFormatter = new MeasureFormat({'operator':{'productOperator':' '}});
+ *	let measureFormatter = new MeasureFormat({'operator':{'productOperator':' '}});
  *	measureFormatter.formatMeasure( bagMeasure );
  * @example <caption>500 kilogram⋅meter^²/second^²</caption>
- *	torqueMeasure = new Measure(
+ *	let torqueMeasure = new Measure(
  *	{
+ *		'value':500,
  *		'unit':
  *		[
- *			{
- *				'name':'kilogram',
- *			},
+ *			'kilogram',
  *			{
  *				'name':'meter',
  *				'exp':2,
@@ -160,31 +159,30 @@ MeasureCollator.defaults =
  *				'exp':-2,
  *			},
  *		],
- *		'value':500,
  *	});
- *	measureFormatter = new MeasureFormat({'exponent':{'^':'^'}});
+ *	let measureFormatter = new MeasureFormat({'exponent':{'^':'^'}});
  *	measureFormatter.formatMeasure( torqueMeasure );
  * @example <caption>2000 (2-gallon)⋅bucket/second</caption>
- *	fantasiaMeasure = new Measure(
+ *	let fantasiaMeasure = new Measure(
  *	{
+ *		'value':2000,
  *		'unit':
  *		[
  *			{
+ *				'name':'bucket',
  *				'measure':
  *				{
  *					'unit':'gallon',
  *					'value':2,
  *				},
- *				'name':'bucket',
  *			},
  *			{
  *				'name':'second',
  *				'exp':-1,
  *			},
  *		],
- *		'value':2000,
  *	});
- *	measureFormatter = new MeasureFormat({'numberFormatOptions':{'useGrouping':false}});
+ *	let measureFormatter = new MeasureFormat({'numberFormatOptions':{'useGrouping':false}});
  *	measureFormatter.formatMeasure( fantasiaMeasure );
  */
 class Measure
@@ -212,27 +210,33 @@ class Measure
 	}
 	static canAddOrSubtract( leftMeasureUnit, rightMeasureUnit )
 	{
-		const measureCollator = new MeasureCollator();
-		const comparison = measureCollator.compare( leftMeasureUnit, rightMeasureUnit );
+		const measureUnitCollator = new MeasureUnitCollator();
+		const comparison = measureUnitCollator.compare( leftMeasureUnit, rightMeasureUnit );
 		return( comparison == 0 );
 	}
 	/** Invert the unit list.
 	 */
-	static inverseMapper( each, n, every )
+	static inverseUnitMapper( each, n, every )
 	{
-		each.exp *= -1;
-		return( each );
+		return(
+		{
+			'exp':each.exp * -1,
+			'measure':each.measure,
+			'name':each.name,
+		});
 	}
-	static multiplyBy( leftMeasureUnitList, rightMeasureUnitList )
+	static productOfUnits( leftMeasureUnitList, rightMeasureUnitList )
 	{
+		// Use Array.prototype.concat since the left and/or right unit may or may not be an Array.
 		let units = [].concat( leftMeasureUnitList, rightMeasureUnitList )
 			.reduce( Measure.unitReducer, []);
 		return( units );
 	}
-	static divideBy( leftMeasureUnitList, rightMeasureUnitList )
+	static quotientOfUnits( leftMeasureUnitList, rightMeasureUnitList )
 	{
-		let invertedList = rightMeasureUnitList.map( Measure.inverseMapper );
-		let units = multiplyBy( leftMeasureUnitList, invertedList )
+		// Use Array.prototype.concat since the left unit may or may not be an Array.
+		let invertedList = [].concat( rightMeasureUnitList ).map( Measure.inverseUnitMapper );
+		let units = Measure.productOfUnits( leftMeasureUnitList, invertedList )
 			.reduce( Measure.unitReducer, []);
 		return( units );
 	}
@@ -350,7 +354,7 @@ Measure.UnitOfMeasure = class
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
 // 'use strict';
 // const Measure = require( './Measure' );
-// const MeasureCollator = require( './MeasureCollator' );
+// const MeasureUnitCollator = require( './MeasureUnitCollator' );
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
 class MeasureFormat
 {
@@ -383,7 +387,7 @@ class MeasureFormat
 			:MeasureFormat.defaults.numberFormatOptions;
 		this.options.numberFormatter = new Intl.NumberFormat( derived_locales, derivedNumberFormatOptions );
 		//
-		this.measureCollator = new MeasureCollator();
+		this.measureUnitCollator = new MeasureUnitCollator();
 	}
 	formatMeasure( measure )
 	{
@@ -401,7 +405,7 @@ class MeasureFormat
 		const unitList = Array.isArray( measureUnit )?measureUnit:[measureUnit];
 		let value = unitList
 			.reduce( Measure.unitReducer, [])
-			.sort( this.measureCollator.unitSorterFactory())
+			.sort( this.measureUnitCollator.unitSorterFactory())
 			.reduce( this.unitListToStringReducerFactory(), '' );
 		return( value );
 	}
@@ -504,5 +508,5 @@ MeasureFormat.operatorDefaults =
 // if( typeof( module ) !== 'undefined' ){module.exports = MeasureFormat;}
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
 if( typeof( module ) !== 'undefined' ){module.exports.Measure = Measure;}
-if( typeof( module ) !== 'undefined' ){module.exports.MeasureCollator = MeasureCollator;}
+if( typeof( module ) !== 'undefined' ){module.exports.MeasureUnitCollator = MeasureUnitCollator;}
 if( typeof( module ) !== 'undefined' ){module.exports.MeasureFormat = MeasureFormat;}

@@ -1,19 +1,19 @@
 'use strict';
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
-class MeasureCollator
+class MeasureUnitCollator
 {
 	/**
-	 * @typedef MeasureCollatorOptions
+	 * @typedef MeasureUnitCollatorOptions
 	 * @param {*} options
 	 * @property {?[string]=[]} operator.locales
 	 *
-	 * @param {MeasureCollatorOptions} this.options
+	 * @param {MeasureUnitCollatorOptions} this.options
 	 */
 	constructor( options )
 	{
 		let derived_locales = (typeof( options ) === 'object' && options !== null)
 			?options.locales
-			:MeasureCollator.defaults.locales;
+			:MeasureUnitCollator.defaults.locales;
 		this.exponentCollator = new Intl.Collator( derived_locales, {'numeric':true});
 		this.nameCollator = new Intl.Collator( derived_locales, {'sensitivity':'base'});
 	}
@@ -111,9 +111,9 @@ class MeasureCollator
 		});
 	}
 }
-MeasureCollator.defaults =
+MeasureUnitCollator.defaults =
 {
 	'locales':[],
 };
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
-if( typeof( module ) !== 'undefined' ){module.exports = MeasureCollator;}
+if( typeof( module ) !== 'undefined' ){module.exports = MeasureUnitCollator;}

@@ -1,5 +1,5 @@
 'use strict';
-// const MeasureCollator = require( './MeasureCollator' );
+// const MeasureUnitCollator = require( './MeasureUnitCollator' );
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
 /**
  * @version 1.0.0 (2019-01-07)
@@ -89,27 +89,33 @@ class Measure
 	}
 	static canAddOrSubtract( leftMeasureUnit, rightMeasureUnit )
 	{
-		const measureCollator = new MeasureCollator();
-		const comparison = measureCollator.compare( leftMeasureUnit, rightMeasureUnit );
+		const measureUnitCollator = new MeasureUnitCollator();
+		const comparison = measureUnitCollator.compare( leftMeasureUnit, rightMeasureUnit );
 		return( comparison == 0 );
 	}
 	/** Invert the unit list.
 	 */
-	static inverseMapper( each, n, every )
+	static inverseUnitMapper( each, n, every )
 	{
-		each.exp *= -1;
-		return( each );
+		return(
+		{
+			'exp':each.exp * -1,
+			'measure':each.measure,
+			'name':each.name,
+		});
 	}
-	static multiplyBy( leftMeasureUnitList, rightMeasureUnitList )
+	static productOfUnits( leftMeasureUnitList, rightMeasureUnitList )
 	{
+		// Use Array.prototype.concat since the left and/or right unit may or may not be an Array.
 		let units = [].concat( leftMeasureUnitList, rightMeasureUnitList )
 			.reduce( Measure.unitReducer, []);
 		return( units );
 	}
-	static divideBy( leftMeasureUnitList, rightMeasureUnitList )
+	static quotientOfUnits( leftMeasureUnitList, rightMeasureUnitList )
 	{
-		let invertedList = rightMeasureUnitList.map( Measure.inverseMapper );
-		let units = multiplyBy( leftMeasureUnitList, invertedList )
+		// Use Array.prototype.concat since the left unit may or may not be an Array.
+		let invertedList = [].concat( rightMeasureUnitList ).map( Measure.inverseUnitMapper );
+		let units = Measure.productOfUnits( leftMeasureUnitList, invertedList )
 			.reduce( Measure.unitReducer, []);
 		return( units );
 	}

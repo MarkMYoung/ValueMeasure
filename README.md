@@ -1,6 +1,10 @@
 # ValueMeasure
 A data type and utilities for handling units of measure.
 
+```JavaScript
+const {Measure, MeasureUnitCollator, MeasureFormat} = require( 'valuemeasure' );
+```
+
 Simple unit as a string.
 ```JavaScript
 let bagMeasure = new Measure(
@@ -68,4 +72,45 @@ let fantasiaMeasure = new Measure(
 let measureFormatter = new MeasureFormat({'numberFormatOptions':{'useGrouping':false}});
 measureFormatter.formatMeasure( fantasiaMeasure );
 // 2000 (2-gallon)⋅bucket/second
+```
+
+
+```JavaScript
+let accelerationMeasure = new Measure(
+{
+	'value':9.8,
+	'unit':
+	[
+		'meter',
+		{
+			'name':'second',
+			'exp':-2,
+		},
+	],
+});
+let timeMeasure = new Measure(
+{
+	'value':15,
+	'unit':'second',
+});
+let productUnit = Measure.productOfUnits( accelerationMeasure.unit, timeMeasure.unit );
+let speedMeasure = new Measure(
+{
+	'value':0,
+	'unit':
+	[
+		'meter',
+		{
+			'name':'second',
+			'exp':-1,
+		},
+	],
+});
+// Check whether a product of two `Measure`s would produce the expected unit.
+let measureCollator = new MeasureCollator();
+let wasExpected = measureCollator.compare( productUnit, speedMeasure.unit ) == 0;
+// Pretty-print the resulting unit.
+let measureFormatter = new MeasureFormat();
+let unitFormatted = measureFormatter.formatMeasureUnit( productUnit );
+
 ```

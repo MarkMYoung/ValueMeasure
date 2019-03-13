@@ -1,6 +1,6 @@
 'use strict';
 // const Measure = require( './Measure' );
-// const MeasureCollator = require( './MeasureCollator' );
+// const MeasureUnitCollator = require( './MeasureUnitCollator' );
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
 class MeasureFormat
 {
@@ -33,7 +33,7 @@ class MeasureFormat
 			:MeasureFormat.defaults.numberFormatOptions;
 		this.options.numberFormatter = new Intl.NumberFormat( derived_locales, derivedNumberFormatOptions );
 		//
-		this.measureCollator = new MeasureCollator();
+		this.measureUnitCollator = new MeasureUnitCollator();
 	}
 	formatMeasure( measure )
 	{
@@ -51,7 +51,7 @@ class MeasureFormat
 		const unitList = Array.isArray( measureUnit )?measureUnit:[measureUnit];
 		let value = unitList
 			.reduce( Measure.unitReducer, [])
-			.sort( this.measureCollator.unitSorterFactory())
+			.sort( this.measureUnitCollator.unitSorterFactory())
 			.reduce( this.unitListToStringReducerFactory(), '' );
 		return( value );
 	}
